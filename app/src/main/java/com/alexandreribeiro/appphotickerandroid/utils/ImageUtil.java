@@ -181,6 +181,7 @@ public class ImageUtil {
         mImagemSelected.setRotation(mImagemSelected.getRotation() + 5);
     }
 
+    //responsavel para criar um arquivo para imagem
     public static File createImageFale(Context context) throws IOException{
         String imageFileName ="photicker";
         //diretorio para armazenar imagem

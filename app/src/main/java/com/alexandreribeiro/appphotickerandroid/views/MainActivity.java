@@ -1,10 +1,15 @@
 package com.alexandreribeiro.appphotickerandroid.views;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -17,6 +22,7 @@ import android.widget.Toast;
 import com.alexandreribeiro.appphotickerandroid.R;
 import com.alexandreribeiro.appphotickerandroid.utils.ImageUtil;
 import com.alexandreribeiro.appphotickerandroid.utils.LongEventType;
+import com.alexandreribeiro.appphotickerandroid.utils.PermissionUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +42,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
@@ -73,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.mViewHolderMain.mBtnRotateRight = findViewById(R.id.img_rotate_right);
         this.mViewHolderMain.mBtnZoomIn = findViewById(R.id.img_zoom_in);
         this.mViewHolderMain.mBtnZoomOut = findViewById(R.id.img_zoom_out);
+        this.mViewHolderMain.mBtnCamera = findViewById(R.id.image_take_photo);
         this.setListeners();
     }
 
@@ -83,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.mViewHolderMain.mBtnRotateRight.setOnClickListener(this);
         this.mViewHolderMain.mBtnZoomIn.setOnClickListener(this);
         this.mViewHolderMain.mBtnZoomOut.setOnClickListener(this);
+        this.mViewHolderMain.mBtnCamera.setOnClickListener(this);
 
         this.mViewHolderMain.mBtnRotateLeft.setOnLongClickListener(this);
         this.mViewHolderMain.mBtnRotateRight.setOnLongClickListener(this);
@@ -99,8 +111,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.image_take_photo:
+                //verificar as permissões para acesso à câmera
+                if(!PermissionUtil.hasCameraPermission(this)){
+                    PermissionUtil.askCameraPermission(this);
+                }
                 dispatchTakePictureIntent();
-
+                break;
             case R.id.img_zoom_in:
                 ImageUtil.handleZoonIn(this.mImagemSelected);
                 break;
@@ -122,7 +138,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //resultado das permissões
+        if(requestCode == PermissionUtil.CAMERA_PERMISSION){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                dispatchTakePictureIntent();
+            } else{
+                new AlertDialog.Builder(this)
+                        .setMessage(getString(R.string.without_permission_camera_explanation))
+                        .setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //para ser fechada a dialog
+                                dialog.dismiss();
+                            }
+                        }).show();
+            }
+        }
+    }
+
     private void dispatchTakePictureIntent() {
+        //avisa que estamos com intenção de capturar uma imagem
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         //avisar que existe essa intenção no celular
@@ -257,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageView mBtnRotateRight;
         ImageView mBtnSave;
         ImageView mBtnRemove;
+        ImageView mBtnCamera;
 
         LinearLayout mLinearSharedPanel;
         LinearLayout mLinearControlePanel;
