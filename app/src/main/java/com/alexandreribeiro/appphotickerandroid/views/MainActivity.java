@@ -1,7 +1,10 @@
 package com.alexandreribeiro.appphotickerandroid.views;
 
+import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -9,16 +12,20 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.alexandreribeiro.appphotickerandroid.R;
 import com.alexandreribeiro.appphotickerandroid.utils.ImageUtil;
 import com.alexandreribeiro.appphotickerandroid.utils.LongEventType;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, View.OnTouchListener{
 
 
+    private static final int REQUEST_TAKE_PHOTO = 2;
     private final ViewHolderMain mViewHolderMain = new ViewHolderMain();
     private ImageView mImagemSelected;
     private boolean mAutoIncrement;
@@ -91,6 +98,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()){
+            case R.id.image_take_photo:
+                dispatchTakePictureIntent();
+
             case R.id.img_zoom_in:
                 ImageUtil.handleZoonIn(this.mImagemSelected);
                 break;
@@ -110,6 +120,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 this.mViewHolderMain.mRelativePhotoContent.removeView(this.mImagemSelected);
                 break;
         }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        //avisar que existe essa intenção no celular
+        if(takePictureIntent.resolveActivity(getPackageManager())!=null){
+            //iniciar a camera do celular
+            File photoFile = null;
+            try {
+                photoFile = ImageUtil.createImageFale(this);
+                //guardar o path da imagem
+                this.mViewHolderMain.mURIPhotoPath = Uri.fromFile(photoFile);
+            }catch (IOException e){
+                Toast.makeText(getApplicationContext(), "Não foi possível iniciar a camera", Toast.LENGTH_SHORT).show();
+            }
+
+            //aqui verifica se continua na chamada da camera
+            if(photoFile != null){
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+
     }
 
     private View.OnClickListener onClickImageOption(final RelativeLayout relativeLayout, final Integer imageId, int with, int height) {
@@ -229,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         RelativeLayout mRelativePhotoContent;
 
+        Uri mURIPhotoPath;
     }
 
     private class RptUpdater implements Runnable {

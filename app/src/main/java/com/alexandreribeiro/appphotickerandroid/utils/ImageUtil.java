@@ -1,13 +1,18 @@
 package com.alexandreribeiro.appphotickerandroid.utils;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.alexandreribeiro.appphotickerandroid.R;
+import com.alexandreribeiro.appphotickerandroid.views.MainActivity;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,5 +179,16 @@ public class ImageUtil {
 
     public static void handleRotateRight(ImageView mImagemSelected) {
         mImagemSelected.setRotation(mImagemSelected.getRotation() + 5);
+    }
+
+    public static File createImageFale(Context context) throws IOException{
+        String imageFileName ="photicker";
+        //diretorio para armazenar imagem
+        File storeDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        //criar imagem
+        File image = File.createTempFile(imageFileName, ".jpg", storeDir);
+        return image;
+
+
     }
 }
