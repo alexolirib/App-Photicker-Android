@@ -3,6 +3,7 @@ package com.alexandreribeiro.appphotickerandroid.views;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
@@ -40,11 +41,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //tratar erro da câmera
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mViewHolderMain.mLinearControlePanel = this.findViewById(R.id.linear_control_painel);
         mViewHolderMain.mLinearSharedPanel = this.findViewById(R.id.linear_share_panel);
 
+        this.mViewHolderMain.mImagePhoto = findViewById(R.id.image_photo);
         this.mViewHolderMain.mBtnRemove = findViewById(R.id.img_remove);
         this.mViewHolderMain.mBtnSave = findViewById(R.id.img_finish);
         this.mViewHolderMain.mBtnRotateLeft = findViewById(R.id.img_rotate_left);
@@ -143,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //resultado das permissões
         if(requestCode == PermissionUtil.CAMERA_PERMISSION){
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                //chamamos a câmera a partir daqui
                 dispatchTakePictureIntent();
             } else{
                 new AlertDialog.Builder(this)
@@ -156,6 +161,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }).show();
             }
         }
+    }
+
+    //retorno do startActivityForResult(sendo chamado a câmera)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //verificar se é da camera
+        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK){
+            this.setPhotoAsBackground();
+        }
+    }
+
+    private void setPhotoAsBackground() {
+
+        //dimensons da view
+        int targetW = this.mViewHolderMain.mImagePhoto.getWidth();
+        int targetH = this.mViewHolderMain.mImagePhoto.getHeight();
+
+        //dimensons da foto
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        //para não utilizar muito os recursos de memoria
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(this.mViewHolderMain.mURIPhotoPath.getPath(), bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        //redimencionar a photo
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        //para utilizar a imagem
+        bmOptions.inJustDecodeBounds = false;
+
+        //redimencionar a imagem
+        bmOptions.inSampleSize = scaleFactor;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(this.mViewHolderMain.mURIPhotoPath.getPath(), bmOptions);
+
+        this.mViewHolderMain.mImagePhoto.setImageBitmap(bitmap);
     }
 
     private void dispatchTakePictureIntent() {
@@ -177,6 +219,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //aqui verifica se continua na chamada da camera
             if(photoFile != null){
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+
+                //chamada da câmera ocorre exatamente nesse ponto
+                //startActivityForResult retorna o resultado com a foto no método - onActivityResult
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
@@ -295,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageView mBtnSave;
         ImageView mBtnRemove;
         ImageView mBtnCamera;
+        ImageView mImagePhoto;
 
         LinearLayout mLinearSharedPanel;
         LinearLayout mLinearControlePanel;
