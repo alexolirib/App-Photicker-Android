@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImageUtil {
-    public static List<Integer> getImageList(){
+    public static List<Integer> getImageList() {
         List<Integer> images = new ArrayList<>();
         images.add(R.drawable.st_animal_0);
         images.add(R.drawable.st_animal_10);
@@ -29,8 +29,8 @@ public class ImageUtil {
         images.add(R.drawable.st_animal_13);
         images.add(R.drawable.st_animal_14);
         images.add(R.drawable.st_animal_16);
-        images.add(R.drawable.st_animal_17);
         images.add(R.drawable.st_animal_18);
+        images.add(R.drawable.st_animal_17);
         images.add(R.drawable.st_animal_19);
         images.add(R.drawable.st_animal_2);
         images.add(R.drawable.st_animal_20);
@@ -149,14 +149,14 @@ public class ImageUtil {
 
     public static void handleZoonIn(ImageView mImagemSelected) {
         //se for maior que 800 não vou querer que aumente mais
-        if(mImagemSelected.getWidth() > 800){
+        if (mImagemSelected.getWidth() > 800) {
             return;
         }
 
         ViewGroup.LayoutParams params = mImagemSelected.getLayoutParams();
         //aqui vou pegar os valores que vou adicionar
         params.width = (int) (mImagemSelected.getWidth() + (mImagemSelected.getWidth() * 0.1));
-        params.height = (int) (mImagemSelected.getHeight() + (mImagemSelected.getHeight()*0.1));
+        params.height = (int) (mImagemSelected.getHeight() + (mImagemSelected.getHeight() * 0.1));
         //setar novos valores para a imagem
         mImagemSelected.setLayoutParams(params);
 
@@ -164,14 +164,14 @@ public class ImageUtil {
     }
 
     public static void handleZoonOut(ImageView mImagemSelected) {
-        if(mImagemSelected.getWidth() < 50){
-        return;
-    }
+        if (mImagemSelected.getWidth() < 50) {
+            return;
+        }
 
         ViewGroup.LayoutParams params = mImagemSelected.getLayoutParams();
 
         params.width = (int) (mImagemSelected.getWidth() - (mImagemSelected.getWidth() * 0.1));
-        params.height = (int) (mImagemSelected.getHeight() - (mImagemSelected.getHeight()*0.1));
+        params.height = (int) (mImagemSelected.getHeight() - (mImagemSelected.getHeight() * 0.1));
 
         mImagemSelected.setLayoutParams(params);
     }
@@ -185,8 +185,8 @@ public class ImageUtil {
     }
 
     //responsavel para criar um arquivo para imagem
-    public static File createImageFale(Context context) throws IOException{
-        String imageFileName ="photicker";
+    public static File createImageFale(Context context) throws IOException {
+        String imageFileName = "photicker";
         //diretorio para armazenar imagem
         File storeDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         //criar imagem
@@ -205,17 +205,17 @@ public class ImageUtil {
 
             //saber qual é a orientação
             int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            switch (orientation){
+            switch (orientation) {
                 case ExifInterface.ORIENTATION_ROTATE_90:
-                    return  rotateImage(img, 90);
+                    return rotateImage(img, 90);
                 case ExifInterface.ORIENTATION_ROTATE_180:
-                    return  rotateImage(img, 90);
+                    return rotateImage(img, 90);
                 case ExifInterface.ORIENTATION_ROTATE_270:
-                    return  rotateImage(img, 90);
+                    return rotateImage(img, 90);
                 default:
-                    return  img;
+                    return img;
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             return img;
         }
     }
@@ -223,7 +223,7 @@ public class ImageUtil {
     private static Bitmap rotateImage(Bitmap img, int degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0,0,img.getWidth(), img.getHeight(), matrix, false);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, false);
 
         //como não vamos mais utilizar
         img.recycle();
