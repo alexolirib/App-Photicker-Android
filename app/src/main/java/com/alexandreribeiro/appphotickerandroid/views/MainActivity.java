@@ -24,6 +24,7 @@ import com.alexandreribeiro.appphotickerandroid.R;
 import com.alexandreribeiro.appphotickerandroid.utils.ImageUtil;
 import com.alexandreribeiro.appphotickerandroid.utils.LongEventType;
 import com.alexandreribeiro.appphotickerandroid.utils.PermissionUtil;
+import com.alexandreribeiro.appphotickerandroid.utils.SocialUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +81,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mViewHolderMain.mLinearControlePanel = this.findViewById(R.id.linear_control_painel);
         mViewHolderMain.mLinearSharedPanel = this.findViewById(R.id.linear_share_panel);
 
+        this.mViewHolderMain.mImageInstagram = this.findViewById(R.id.img_insta);
+        this.mViewHolderMain.mImageFacebook = this.findViewById(R.id.img_face);
+        this.mViewHolderMain.mImageWhatsapp = this.findViewById(R.id.img_whatsapp);
+        this.mViewHolderMain.mImageTwitter = this.findViewById(R.id.img_twitter);
+
         this.mViewHolderMain.mImagePhoto = findViewById(R.id.image_photo);
         this.mViewHolderMain.mBtnRemove = findViewById(R.id.img_remove);
         this.mViewHolderMain.mBtnSave = findViewById(R.id.img_finish);
@@ -99,6 +105,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.mViewHolderMain.mBtnZoomIn.setOnClickListener(this);
         this.mViewHolderMain.mBtnZoomOut.setOnClickListener(this);
         this.mViewHolderMain.mBtnCamera.setOnClickListener(this);
+
+        this.mViewHolderMain.mImageTwitter.setOnClickListener(this);
+        this.mViewHolderMain.mImageWhatsapp.setOnClickListener(this);
+        this.mViewHolderMain.mImageInstagram.setOnClickListener(this);
+        this.mViewHolderMain.mImageFacebook.setOnClickListener(this);
 
         this.mViewHolderMain.mBtnRotateLeft.setOnLongClickListener(this);
         this.mViewHolderMain.mBtnRotateRight.setOnLongClickListener(this);
@@ -139,10 +150,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.img_remove:
                 this.mViewHolderMain.mRelativePhotoContent.removeView(this.mImagemSelected);
                 break;
+            case R.id.img_insta:
+                SocialUtil.shareImageOnInsta(this,this.mViewHolderMain.mRelativePhotoContent, v);
+                break;
+            case R.id.img_face:
+                SocialUtil.shareImageOnFace(this,this.mViewHolderMain.mRelativePhotoContent, v);
+                break;
+            case R.id.img_twitter:
+                SocialUtil.shareImageOnTwitter(this,this.mViewHolderMain.mRelativePhotoContent, v);
+                break;
+            case R.id.img_whatsapp:
+                SocialUtil.shareImageOnWhatsapp(this,this.mViewHolderMain.mRelativePhotoContent, v);
+                break;
         }
     }
 
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         //resultado das permissões
         if(requestCode == PermissionUtil.CAMERA_PERMISSION){
@@ -161,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }).show();
             }
         }
-    }
+    }*/
 
     //retorno do startActivityForResult(sendo chamado a câmera)
     @Override
@@ -171,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             this.setPhotoAsBackground();
         }
     }
-
     private void setPhotoAsBackground() {
 
         //dimensons da view
@@ -197,7 +219,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Bitmap bitmap = BitmapFactory.decodeFile(this.mViewHolderMain.mURIPhotoPath.getPath(), bmOptions);
 
-        this.mViewHolderMain.mImagePhoto.setImageBitmap(bitmap);
+        Bitmap bitmapRotated = ImageUtil.rotateImageRequerid(bitmap, this.mViewHolderMain.mURIPhotoPath);
+
+        this.mViewHolderMain.mImagePhoto.setImageBitmap(bitmapRotated);
     }
 
     private void dispatchTakePictureIntent() {
@@ -232,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                relativeLayout.removeAllViews();
+               // relativeLayout.removeAllViews();
                 final  ImageView image  = new ImageView(MainActivity.this);
                 image.setBackgroundResource(imageId);
                 relativeLayout.addView(image);
@@ -341,6 +365,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageView mBtnRemove;
         ImageView mBtnCamera;
         ImageView mImagePhoto;
+
+        ImageView mImageInstagram;
+        ImageView mImageFacebook;
+        ImageView mImageTwitter;
+        ImageView mImageWhatsapp;
 
         LinearLayout mLinearSharedPanel;
         LinearLayout mLinearControlePanel;

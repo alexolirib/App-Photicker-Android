@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Environment;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -191,5 +194,39 @@ public class ImageUtil {
         return image;
 
 
+    }
+
+    public static Bitmap rotateImageRequerid(Bitmap img, Uri selectedImage) {
+        //verificar se precisa rotacionar a imagem
+        ExifInterface exifInterface;
+        try {
+
+            exifInterface = new ExifInterface(selectedImage.getPath());
+
+            //saber qual é a orientação
+            int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            switch (orientation){
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    return  rotateImage(img, 90);
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    return  rotateImage(img, 90);
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    return  rotateImage(img, 90);
+                default:
+                    return  img;
+            }
+        } catch (IOException e){
+            return img;
+        }
+    }
+
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0,0,img.getWidth(), img.getHeight(), matrix, false);
+
+        //como não vamos mais utilizar
+        img.recycle();
+        return rotatedImg;
     }
 }

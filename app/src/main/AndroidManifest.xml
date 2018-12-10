@@ -3,8 +3,7 @@
     package="com.alexandreribeiro.appphotickerandroid">
 
     <uses-feature android:name="android.hardware.camera" />
-    
-    <uses-permission android:name="android.permission.CAMERA" />
+
     <!--conseguir salvar câmera no disposivo-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
