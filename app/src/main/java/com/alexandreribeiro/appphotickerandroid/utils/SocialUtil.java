@@ -12,6 +12,10 @@ import android.widget.Toast;
 
 import com.alexandreribeiro.appphotickerandroid.R;
 import com.alexandreribeiro.appphotickerandroid.views.MainActivity;
+import com.facebook.share.model.ShareHashtag;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,50 +31,62 @@ public class SocialUtil {
     public static void shareImageOnInsta(MainActivity mainActivity, RelativeLayout mRelativePhotoContent, View v) {
         PackageManager pkManager = mainActivity.getPackageManager();
 
-        try{
+        try {
             pkManager.getPackageInfo("com.instagram.android", 0);
 
             Bitmap image = ImageUtil.drawBitmap(mRelativePhotoContent);
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             image.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
 
-            File file = new File(Environment.getExternalStorageDirectory()+ File.separator + "temp_file.jpg");
+            File file = new File(Environment.getExternalStorageDirectory() + File.separator + "temp_file.jpg");
 
-            try{
-               file.createNewFile();
-               FileOutputStream fo = new FileOutputStream(file);
-               fo.write(bytes.toByteArray());
+            try {
+                file.createNewFile();
+                FileOutputStream fo = new FileOutputStream(file);
+                fo.write(bytes.toByteArray());
 
-               Intent sendIntent = new Intent();
-               sendIntent.setAction(Intent.ACTION_SEND);
-               //sem HASHTAG
-               sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temp_file.jpg"));
-               sendIntent.setType("image/*");
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                //sem HASHTAG
+                sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temp_file.jpg"));
+                sendIntent.setType("image/*");
                 //quem irá tratar a intent
                 sendIntent.setPackage("com.instagram.android");
 
                 v.getContext().startActivity(Intent.createChooser(sendIntent, mainActivity.getString(R.string.share_image)));
 
-            }catch (FileNotFoundException e){
-                Toast.makeText(mainActivity, R.string.unexpected_error,Toast.LENGTH_SHORT).show();
-            } catch (IOException e){
-                Toast.makeText(mainActivity, R.string.unexpected_error,Toast.LENGTH_SHORT).show();
+            } catch (FileNotFoundException e) {
+                Toast.makeText(mainActivity, R.string.unexpected_error, Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                Toast.makeText(mainActivity, R.string.unexpected_error, Toast.LENGTH_SHORT).show();
             }
 
-        }catch (PackageManager.NameNotFoundException e){
+        } catch (PackageManager.NameNotFoundException e) {
             Toast.makeText(mainActivity, R.string.instagram_not_installed, Toast.LENGTH_SHORT).show();
         }
     }
 
     public static void shareImageOnFace(MainActivity mainActivity, RelativeLayout mRelativePhotoContent, View v) {
+        //assim compartilhamos a imagem
+        SharePhoto photo = new SharePhoto.Builder()
+                .setBitmap(ImageUtil.drawBitmap(mRelativePhotoContent))
+                .build();
+        //adicionar o hashtag
+        SharePhotoContent content = new SharePhotoContent.Builder()
+                .addPhoto(photo)
+                .setShareHashtag(new ShareHashtag.Builder().setHashtag(HASHTAG).build())
+                .build();
+        //compartilha
+        new ShareDialog(mainActivity).show(content);
+
     }
 
     public static void shareImageOnTwitter(MainActivity mainActivity, RelativeLayout mRelativePhotoContent, View v) {
         PackageManager pkManager = mainActivity.getPackageManager();
 
-        try{
+        try {
             //verificar se o twitter está instalado
-            pkManager.getPackageInfo("com.twitter.android",0);
+            pkManager.getPackageInfo("com.twitter.android", 0);
             try {
                 Intent tweetIntent = new Intent(Intent.ACTION_SEND);
 
@@ -92,27 +108,27 @@ public class SocialUtil {
 
                 //qual o app que o celular possui para enviar (twitter)
                 PackageManager pm = mainActivity.getPackageManager();
-                List<ResolveInfo> resolve = pm.queryIntentActivities(tweetIntent,PackageManager.MATCH_DEFAULT_ONLY);
+                List<ResolveInfo> resolve = pm.queryIntentActivities(tweetIntent, PackageManager.MATCH_DEFAULT_ONLY);
                 boolean resolved = false;
-                for(ResolveInfo ri : resolve){
+                for (ResolveInfo ri : resolve) {
                     //aqui é para entrar no twitter
-                    if(ri.activityInfo.name.contains("twitter")){
+                    if (ri.activityInfo.name.contains("twitter")) {
                         tweetIntent.setClassName(ri.activityInfo.packageName, ri.activityInfo.name);
                         resolved = true;
                         break;
                     }
                 }
 
-                v.getContext().startActivity(resolved? tweetIntent: Intent.createChooser(tweetIntent, mainActivity.getString(R.string.share_image)));
+                v.getContext().startActivity(resolved ? tweetIntent : Intent.createChooser(tweetIntent, mainActivity.getString(R.string.share_image)));
 
 
-            } catch (FileNotFoundException e){
-                Toast.makeText(mainActivity, R.string.unexpected_error,Toast.LENGTH_SHORT).show();
-            } catch (IOException e){
-                Toast.makeText(mainActivity, R.string.unexpected_error,Toast.LENGTH_SHORT).show();
+            } catch (FileNotFoundException e) {
+                Toast.makeText(mainActivity, R.string.unexpected_error, Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                Toast.makeText(mainActivity, R.string.unexpected_error, Toast.LENGTH_SHORT).show();
             }
 
-        }catch (PackageManager.NameNotFoundException e){
+        } catch (PackageManager.NameNotFoundException e) {
             Toast.makeText(mainActivity, R.string.twitter_not_installed, Toast.LENGTH_SHORT).show();
         }
 
@@ -122,9 +138,9 @@ public class SocialUtil {
         //verificar se está instalado
         PackageManager pkManager = mainActivity.getPackageManager();
 
-        try{
+        try {
             pkManager.getPackageInfo("com.whatsapp", 0);
-            String fileName = "temp_file" + System.currentTimeMillis()+ ".jpg";
+            String fileName = "temp_file" + System.currentTimeMillis() + ".jpg";
 
             try {
                 //relative seja uma img
@@ -132,7 +148,7 @@ public class SocialUtil {
                 mRelativePhotoContent.setDrawingCacheEnabled(true);
                 mRelativePhotoContent.buildDrawingCache(true);
 
-                File imageFile = new File(Environment.getExternalStorageDirectory(),fileName);
+                File imageFile = new File(Environment.getExternalStorageDirectory(), fileName);
                 FileOutputStream fileOutputStream = new FileOutputStream(imageFile);
                 mRelativePhotoContent.getDrawingCache(true).compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
                 fileOutputStream.close();
@@ -143,17 +159,17 @@ public class SocialUtil {
                     Intent sendIntend = new Intent();
                     sendIntend.setAction(Intent.ACTION_SEND);
                     sendIntend.putExtra(Intent.EXTRA_TEXT, HASHTAG);
-                    sendIntend.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/"+ fileName));
+                    sendIntend.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/" + fileName));
 
                     sendIntend.setType("image/jpeg");
                     sendIntend.setPackage("com.whatsapp");
 
                     v.getContext().startActivity(Intent.createChooser(sendIntend, mainActivity.getString(R.string.share_image)));
-                }catch (Exception e){
+                } catch (Exception e) {
                     Toast.makeText(mainActivity, R.string.unexpected_error, Toast.LENGTH_SHORT).show();
                 }
 
-            } catch (FileNotFoundException e){
+            } catch (FileNotFoundException e) {
                 Toast.makeText(mainActivity, R.string.unexpected_error, Toast.LENGTH_SHORT).show();
 
             } catch (IOException e) {
@@ -161,7 +177,7 @@ public class SocialUtil {
 
             }
 
-        } catch (PackageManager.NameNotFoundException e){
+        } catch (PackageManager.NameNotFoundException e) {
             Toast.makeText(mainActivity, R.string.whatsapp_not_installed, Toast.LENGTH_SHORT).show();
         }
     }
