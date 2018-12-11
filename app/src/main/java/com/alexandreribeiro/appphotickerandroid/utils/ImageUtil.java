@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.alexandreribeiro.appphotickerandroid.R;
 import com.alexandreribeiro.appphotickerandroid.views.MainActivity;
@@ -228,5 +229,10 @@ public class ImageUtil {
         //como não vamos mais utilizar
         img.recycle();
         return rotatedImg;
+    }
+
+    public static Bitmap drawBitmap(RelativeLayout mRelativePhotoContent) {
+        mRelativePhotoContent.setDrawingCacheEnabled(true);
+        return mRelativePhotoContent.getDrawingCache();
     }
 }
